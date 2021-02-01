@@ -329,8 +329,7 @@ ASTPointer<ContractDefinition> Parser::parseContractDefinition()
 	{
 		documentation = parseStructuredDocumentation();
 		contractKind = parseContractKind();
-		nameLocation = currentLocation();
-		name = expectIdentifierToken();
+		tie(name, nameLocation) = expectIdentifierWithLocation();
 		if (m_scanner->currentToken() == Token::Is)
 			do
 			{
@@ -593,8 +592,8 @@ ASTPointer<ASTNode> Parser::parseFunctionDefinition(bool _freeFunction)
 				{Token::Fallback, "fallback function"},
 				{Token::Receive, "receive function"},
 			}.at(m_scanner->currentToken());
-			name = make_shared<ASTString>(TokenTraits::toString(m_scanner->currentToken()));
 			nameLocation = currentLocation();
+			name = make_shared<ASTString>(TokenTraits::toString(m_scanner->currentToken()));
 			string message{
 				"This function is named \"" + *name + "\" but is not the " + expected + " of the contract. "
 				"If you intend this to be a " + expected + ", use \"" + *name + "(...) { ... }\" without "
@@ -608,8 +607,7 @@ ASTPointer<ASTNode> Parser::parseFunctionDefinition(bool _freeFunction)
 		}
 		else
 		{
-			nameLocation = currentLocation();
-			name = expectIdentifierToken();
+			tie(name, nameLocation) = expectIdentifierWithLocation();
 		}
 	}
 	else
@@ -811,8 +809,7 @@ ASTPointer<VariableDeclaration> Parser::parseVariableDeclaration(
 	else
 	{
 		nodeFactory.markEndPosition();
-		nameLocation = currentLocation();
-		identifier = expectIdentifierToken();
+		tie(identifier, nameLocation) = expectIdentifierWithLocation();
 	}
 	ASTPointer<Expression> value;
 	if (_options.allowInitialValue)
@@ -897,6 +894,14 @@ ASTPointer<ModifierDefinition> Parser::parseModifierDefinition()
 	return nodeFactory.createNode<ModifierDefinition>(name, move(nameLocation), documentation, parameters, isVirtual, overrides, block);
 }
 
+pair<ASTPointer<ASTString>, SourceLocation> Parser::expectIdentifierWithLocation()
+{
+	SourceLocation nameLocation = currentLocation();
+	ASTPointer<ASTString> name = expectIdentifierToken();
+
+	return {name, nameLocation};
+}
+
 ASTPointer<EventDefinition> Parser::parseEventDefinition()
 {
 	RecursionGuard recursionGuard(*this);
@@ -904,8 +909,7 @@ ASTPointer<EventDefinition> Parser::parseEventDefinition()
 	ASTPointer<StructuredDocumentation> documentation = parseStructuredDocumentation();
 
 	expectToken(Token::Event);
-	ASTPointer<ASTString> name(expectIdentifierToken());
-	SourceLocation nameLocation = currentLocation();
+	auto [name, nameLocation] = expectIdentifierWithLocation();
 
 	VarDeclParserOptions options;
 	options.allowIndexed = true;
