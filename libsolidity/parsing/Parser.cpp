@@ -226,7 +226,7 @@ ASTPointer<ImportDirective> Parser::parseImportDirective()
 	expectToken(Token::Import);
 	ASTPointer<ASTString> path;
 	ASTPointer<ASTString> unitAlias = make_shared<string>();
-	SourceLocation unitAliasLocation = currentLocation();
+	SourceLocation unitAliasLocation = {};
 	ImportDirective::SymbolAliasList symbolAliases;
 
 	if (m_scanner->currentToken() == Token::StringLiteral)
@@ -284,7 +284,7 @@ ASTPointer<ImportDirective> Parser::parseImportDirective()
 		fatalParserError(6326_error, "Import path cannot be empty.");
 	nodeFactory.markEndPosition();
 	expectToken(Token::Semicolon);
-	return nodeFactory.createNode<ImportDirective>(path, unitAlias, unitAliasLocation, move(symbolAliases));
+	return nodeFactory.createNode<ImportDirective>(path, unitAlias, move(unitAliasLocation), move(symbolAliases));
 }
 
 std::pair<ContractKind, bool> Parser::parseContractKind()
@@ -329,8 +329,8 @@ ASTPointer<ContractDefinition> Parser::parseContractDefinition()
 	{
 		documentation = parseStructuredDocumentation();
 		contractKind = parseContractKind();
-		name = expectIdentifierToken();
 		nameLocation = currentLocation();
+		name = expectIdentifierToken();
 		if (m_scanner->currentToken() == Token::Is)
 			do
 			{
@@ -390,7 +390,7 @@ ASTPointer<ContractDefinition> Parser::parseContractDefinition()
 		expectToken(Token::RBrace);
 	return nodeFactory.createNode<ContractDefinition>(
 		name,
-		nameLocation,
+		move(nameLocation),
 		documentation,
 		baseContracts,
 		subNodes,
@@ -615,9 +615,9 @@ ASTPointer<ASTNode> Parser::parseFunctionDefinition(bool _freeFunction)
 	else
 	{
 		solAssert(kind == Token::Constructor || kind == Token::Fallback || kind == Token::Receive, "");
-		m_scanner->next();
-		name = make_shared<ASTString>();
 		nameLocation = currentLocation();
+		name = make_shared<ASTString>();
+		m_scanner->next();
 	}
 
 	FunctionHeaderParserResult header = parseFunctionHeader(false);
@@ -633,7 +633,7 @@ ASTPointer<ASTNode> Parser::parseFunctionDefinition(bool _freeFunction)
 	}
 	return nodeFactory.createNode<FunctionDefinition>(
 		name,
-		nameLocation,
+		move(nameLocation),
 		header.visibility,
 		header.stateMutability,
 		_freeFunction,
@@ -653,8 +653,8 @@ ASTPointer<StructDefinition> Parser::parseStructDefinition()
 	RecursionGuard recursionGuard(*this);
 	ASTNodeFactory nodeFactory(*this);
 	expectToken(Token::Struct);
-	ASTPointer<ASTString> name = expectIdentifierToken();
 	SourceLocation nameLocation = currentLocation();
+	ASTPointer<ASTString> name = expectIdentifierToken();
 	vector<ASTPointer<VariableDeclaration>> members;
 	expectToken(Token::LBrace);
 	while (m_scanner->currentToken() != Token::RBrace)
@@ -664,7 +664,7 @@ ASTPointer<StructDefinition> Parser::parseStructDefinition()
 	}
 	nodeFactory.markEndPosition();
 	expectToken(Token::RBrace);
-	return nodeFactory.createNode<StructDefinition>(name, nameLocation, members);
+	return nodeFactory.createNode<StructDefinition>(name, move(nameLocation), members);
 }
 
 ASTPointer<EnumValue> Parser::parseEnumValue()
@@ -680,9 +680,8 @@ ASTPointer<EnumDefinition> Parser::parseEnumDefinition()
 	RecursionGuard recursionGuard(*this);
 	ASTNodeFactory nodeFactory(*this);
 	expectToken(Token::Enum);
+	SourceLocation nameLocation = currentLocation();
 	ASTPointer<ASTString> name = expectIdentifierToken();
-	nodeFactory.markEndPosition();
-	SourceLocation nameLocation = nodeFactory.location();
 	vector<ASTPointer<EnumValue>> members;
 	expectToken(Token::LBrace);
 
@@ -700,7 +699,7 @@ ASTPointer<EnumDefinition> Parser::parseEnumDefinition()
 
 	nodeFactory.markEndPosition();
 	expectToken(Token::RBrace);
-	return nodeFactory.createNode<EnumDefinition>(name, nameLocation, members);
+	return nodeFactory.createNode<EnumDefinition>(name, move(nameLocation), members);
 }
 
 ASTPointer<VariableDeclaration> Parser::parseVariableDeclaration(
@@ -828,7 +827,7 @@ ASTPointer<VariableDeclaration> Parser::parseVariableDeclaration(
 	return nodeFactory.createNode<VariableDeclaration>(
 		type,
 		identifier,
-		nameLocation,
+		move(nameLocation),
 		value,
 		visibility,
 		documentation,
@@ -895,7 +894,7 @@ ASTPointer<ModifierDefinition> Parser::parseModifierDefinition()
 	else
 		m_scanner->next(); // just consume the ';'
 
-	return nodeFactory.createNode<ModifierDefinition>(name, nameLocation, documentation, parameters, isVirtual, overrides, block);
+	return nodeFactory.createNode<ModifierDefinition>(name, move(nameLocation), documentation, parameters, isVirtual, overrides, block);
 }
 
 ASTPointer<EventDefinition> Parser::parseEventDefinition()
@@ -920,7 +919,7 @@ ASTPointer<EventDefinition> Parser::parseEventDefinition()
 	}
 	nodeFactory.markEndPosition();
 	expectToken(Token::Semicolon);
-	return nodeFactory.createNode<EventDefinition>(name, nameLocation, documentation, parameters, anonymous);
+	return nodeFactory.createNode<EventDefinition>(name, move(nameLocation), documentation, parameters, anonymous);
 }
 
 ASTPointer<UsingForDirective> Parser::parseUsingDirective()
