@@ -17,7 +17,7 @@
 // SPDX-License-Identifier: GPL-3.0
 
 #include <test/tools/ossfuzz/protoToSol.h>
-#include <test/tools/ossfuzz/SolidityEvmOneInterface.h>
+#include <test/tools/ossfuzz/SolidityEvmoneInterface.h>
 #include <test/tools/ossfuzz/solProto.pb.h>
 
 #include <test/EVMHost.h>
@@ -72,7 +72,7 @@ DEFINE_PROTO_FUZZER(Program const& _input)
 	langutil::EVMVersion version = {};
 	EVMHost hostContext(version, evmone);
 
-	auto minimalResult = EVMOneUtility::compileDeployAndExecute(
+	auto minimalResult = EvmoneUtility::compileDeployAndExecute(
 		hostContext,
 		sol_source,
 		":C",
@@ -83,7 +83,7 @@ DEFINE_PROTO_FUZZER(Program const& _input)
 	bool successState = minimalResult.status_code == EVMC_SUCCESS;
 	if (successState)
 		solAssert(
-			EVMOneUtility::isOutputExpected(minimalResult.output_data, minimalResult.output_size, expectedOutput),
+			EvmoneUtility::isOutputExpected(minimalResult.output_data, minimalResult.output_size, expectedOutput),
 			"Proto solc fuzzer: Output incorrect"
 		);
 }

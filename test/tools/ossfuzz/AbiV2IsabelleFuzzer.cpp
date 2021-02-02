@@ -16,7 +16,7 @@
 */
 // SPDX-License-Identifier: GPL-3.0
 
-#include <test/tools/ossfuzz/SolidityEvmOneInterface.h>
+#include <test/tools/ossfuzz/SolidityEvmoneInterface.h>
 
 #include <test/tools/ossfuzz/protoToAbiV2.h>
 
@@ -82,7 +82,7 @@ DEFINE_PROTO_FUZZER(Contract const& _contract)
 		EVMHost hostContext(version, evmone);
 
 		// Deploy contract and signal failure if deployment failed
-		evmc::result createResult = EVMOneUtility::deployContract(hostContext, byteCode);
+		evmc::result createResult = EvmoneUtility::deployContract(hostContext, byteCode);
 		solAssert(
 			createResult.status_code == EVMC_SUCCESS,
 			"Proto ABIv2 Fuzzer: Contract creation failed"
@@ -90,7 +90,7 @@ DEFINE_PROTO_FUZZER(Contract const& _contract)
 
 		// Execute test function and signal failure if EVM reverted or
 		// did not return expected output on successful execution.
-		evmc::result callResult = EVMOneUtility::executeContract(
+		evmc::result callResult = EvmoneUtility::executeContract(
 			hostContext,
 			fromHex(hexEncodedInput),
 			createResult.create_address
@@ -100,7 +100,7 @@ DEFINE_PROTO_FUZZER(Contract const& _contract)
 		solAssert(callResult.status_code != EVMC_REVERT, "Proto ABIv2 fuzzer: EVM One reverted");
 		if (callResult.status_code == EVMC_SUCCESS)
 			solAssert(
-				EVMOneUtility::isOutputExpected(callResult.output_data, callResult.output_size, expectedOutput),
+				EvmoneUtility::isOutputExpected(callResult.output_data, callResult.output_size, expectedOutput),
 				"Proto ABIv2 fuzzer: ABIv2 coding failure found"
 			);
 

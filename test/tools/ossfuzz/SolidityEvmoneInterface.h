@@ -50,7 +50,7 @@ protected:
 	langutil::EVMVersion m_evmVersion;
 };
 
-struct EVMOneUtility
+struct EvmoneUtility
 {
 	/// Compares the contents of the memory address pointed to
 	/// by `_result` of `_length` bytes to the expected output.
