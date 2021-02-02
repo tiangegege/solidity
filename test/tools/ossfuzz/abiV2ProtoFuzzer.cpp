@@ -16,13 +16,14 @@
 */
 // SPDX-License-Identifier: GPL-3.0
 
-#include <test/tools/ossfuzz/abiV2FuzzerCommon.h>
+#include <test/tools/ossfuzz/SolidityEvmOneInterface.h>
 #include <test/tools/ossfuzz/protoToAbiV2.h>
 
 #include <src/libfuzzer/libfuzzer_macro.h>
 
 #include <fstream>
 
+using namespace solidity::test::fuzzer;
 using namespace solidity::test::abiv2fuzzer;
 using namespace solidity::test;
 using namespace solidity::util;
@@ -31,10 +32,7 @@ using namespace std;
 
 static evmc::VM evmone = evmc::VM{evmc_create_evmone()};
 /// Expected output value is decimal 0
-static vector<uint8_t> const expectedOutput = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
+static vector<uint8_t> const expectedOutput(32, 0);
 
 DEFINE_PROTO_FUZZER(Contract const& _input)
 {
@@ -84,7 +82,7 @@ DEFINE_PROTO_FUZZER(Contract const& _input)
 	EVMHost hostContext(version, evmone);
 
 	// Deploy contract and signal failure if deploy failed
-	evmc::result createResult = AbiV2Utility::deployContract(hostContext, byteCode);
+	evmc::result createResult = EVMOneUtility::deployContract(hostContext, byteCode);
 	solAssert(
 		createResult.status_code == EVMC_SUCCESS,
 		"Proto ABIv2 Fuzzer: Contract creation failed"
@@ -92,7 +90,7 @@ DEFINE_PROTO_FUZZER(Contract const& _input)
 
 	// Execute test function and signal failure if EVM reverted or
 	// did not return expected output on successful execution.
-	evmc::result callResult = AbiV2Utility::executeContract(
+	evmc::result callResult = EVMOneUtility::executeContract(
 		hostContext,
 		fromHex(hexEncodedInput),
 		createResult.create_address
@@ -102,7 +100,7 @@ DEFINE_PROTO_FUZZER(Contract const& _input)
 	solAssert(callResult.status_code != EVMC_REVERT, "Proto ABIv2 fuzzer: EVM One reverted");
 	if (callResult.status_code == EVMC_SUCCESS)
 		solAssert(
-			AbiV2Utility::isOutputExpected(callResult.output_data, callResult.output_size, expectedOutput),
+			EVMOneUtility::isOutputExpected(callResult.output_data, callResult.output_size, expectedOutput),
 			"Proto ABIv2 fuzzer: ABIv2 coding failure found"
 		);
 }

@@ -128,9 +128,9 @@ if (OSSFUZZ)
     target_compile_options(yul_proto_diff_custom_mutate_ossfuzz PUBLIC ${COMPILE_OPTIONS} -Wno-sign-conversion -Wno-suggest-destructor-override -Wno-inconsistent-missing-destructor-override)
 
     add_executable(abiv2_proto_ossfuzz
+            SolidityEvmOneInterface.cpp
             ../../EVMHost.cpp
             abiV2ProtoFuzzer.cpp
-            abiV2FuzzerCommon.cpp
             protoToAbiV2.cpp
             abiV2Proto.pb.cc
     )
@@ -148,9 +148,8 @@ if (OSSFUZZ)
     target_compile_options(abiv2_proto_ossfuzz PUBLIC ${COMPILE_OPTIONS} -Wno-sign-conversion -Wno-suggest-destructor-override -Wno-inconsistent-missing-destructor-override)
 
     add_executable(abiv2_isabelle_ossfuzz
+            SolidityEvmOneInterface.cpp
             ../../EVMHost.cpp
-            AbiV2IsabelleFuzzer.cpp
-            abiV2FuzzerCommon.cpp
             protoToAbiV2.cpp
             abiV2Proto.pb.cc
     )
@@ -170,10 +169,10 @@ if (OSSFUZZ)
     target_compile_options(abiv2_isabelle_ossfuzz PUBLIC ${COMPILE_OPTIONS} -Wno-sign-conversion -Wno-suggest-destructor-override -Wno-inconsistent-missing-destructor-override)
 
     add_executable(sol_proto_ossfuzz
+            SolidityEvmOneInterface.cpp
             solProtoFuzzer.cpp
             protoToSol.cpp
             solProto.pb.cc
-            abiV2FuzzerCommon.cpp
             ../../EVMHost.cpp
     )
     target_include_directories(sol_proto_ossfuzz PRIVATE

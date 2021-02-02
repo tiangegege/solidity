@@ -20,7 +20,7 @@
 
 #include <libsolutil/Whiskers.h>
 
-using namespace solidity::test::fuzzer;
+using namespace solidity::test::fuzzer::mutator;
 using namespace solidity::util;
 using namespace std;
 using PrngUtil = solidity::test::fuzzer::GenerationProbability;
