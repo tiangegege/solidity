@@ -34,7 +34,7 @@ using AssemblyItems = std::vector<AssemblyItem>;
 class Inliner
 {
 public:
-	explicit Inliner(AssemblyItems& _items, size_t _inlineMaxOpcodes): m_items(_items), m_inlineMaxOpcodes(_inlineMaxOpcodes) {}
+	explicit Inliner(AssemblyItems& _items, size_t _runs): m_items(_items), m_runs(_runs) {}
 	virtual ~Inliner() = default;
 
 	void optimise();
@@ -52,7 +52,7 @@ private:
 	std::map<u256, InlinableBlock> determineInlinableBlocks(AssemblyItems const& _items) const;
 
 	AssemblyItems& m_items;
-	size_t const m_inlineMaxOpcodes;
+	size_t const m_runs;
 };
 
 }
